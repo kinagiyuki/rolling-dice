@@ -15,7 +15,10 @@ impl DiceGenerator {
         self.rng.random_range(1..=faces)
     }
 
-    pub fn generate(&mut self, count: usize, faces: u32) -> Vec<u32> {
-        (0..count).map(|_| self.roll_one_dice(faces)).collect::<Vec<u32>>()
+    pub fn generate(&mut self, count: usize, faces: u32) -> Result<Vec<u32>, &str> {
+        if count == 0 || faces == 0 {
+            return Err("Invalid input: count and faces must be positive.");
+        }
+        Ok((0..count).map(|_| self.roll_one_dice(faces)).collect())
     }
 }
