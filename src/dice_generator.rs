@@ -4,6 +4,10 @@ use std::error::Error;
 use std::fmt;
 use std::fs::{create_dir_all, File};
 use std::io::BufWriter;
+use std::path::PathBuf;
+
+static CSV_DIR_NAME: &str = ".trpg-tools";
+static CSV_FILE_NAME: &str = "rolling-records.csv";
 
 #[derive(Debug, serde::Serialize)]
 pub struct DiceRecord {
@@ -34,6 +38,11 @@ impl DiceGenerator {
         }
     }
 
+    fn get_csv_path() -> PathBuf {
+        let home_dir = dirs::home_dir().unwrap();
+        home_dir.join(CSV_DIR_NAME).join(CSV_FILE_NAME)
+    }
+
     pub fn roll_one_dice(&mut self, faces: u32) -> u32 {
         self.rng.random_range(1..=faces)
     }
@@ -54,9 +63,7 @@ impl DiceGenerator {
     }
 
     fn write_roll_to_csv(&self, record: &DiceRecord) {
-        // Define the path to the CSV file
-        let home_dir = dirs::home_dir().unwrap();
-        let csv_path = home_dir.join(".trpg-tools/rolling-records.csv");
+        let csv_path = DiceGenerator::get_csv_path();
 
         // Ensure the directory exists
         if !csv_path.parent().unwrap().exists() {
@@ -84,10 +91,8 @@ impl DiceGenerator {
         wtr.flush().expect("Failed to flush the file");
     }
 
-    pub fn history(&self) -> Result<Vec<DiceRecord>, Box<dyn Error>> {
-        // Define the path to the CSV file
-        let home_dir = dirs::home_dir().unwrap();
-        let csv_path = home_dir.join(".trpg-tools/rolling-records.csv");
+    pub fn history(&self, from_latest: bool) -> Result<Vec<DiceRecord>, Box<dyn Error>> {
+        let csv_path = DiceGenerator::get_csv_path();
 
         // Open the CSV file for reading
         let file = File::open(csv_path)?;
@@ -106,6 +111,10 @@ impl DiceGenerator {
                 sum: record.2,
                 result,
             });
+        }
+
+        if from_latest {
+            records.reverse();
         }
 
         Ok(records)
