@@ -1,34 +1,47 @@
 mod dice_generator;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use dice_generator::DiceGenerator;
 use regex::Regex;
 
 #[derive(Parser, Debug)]
+#[command(name = "rolling-dice", about = "A dice rolling program")]
 struct Args {
-    #[clap(name = "ROLL_COMMAND", help = "Roll command in the format 'ndm'")]
-    roll_command: String,
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    /// Roll dice using NdM format (e.g., 3d6)
+    Roll { dice: String },
+    /// Display roll history
+    History,
 }
 
 fn main() {
     let args = Args::parse();
+    let mut dice_generator = DiceGenerator::new();
 
-    // Define a regular expression to match the pattern 'ndm'
-    let re = Regex::new(r"^(\d+)d(\d+)$").unwrap();
+    match args.command {
+        Commands::Roll { dice} => {
+            let re = Regex::new(r"^(\d+)[dD](\d+)$").unwrap();
+            let captures = re.captures(&dice).expect("Invalid rolling text");
+            let n: usize = captures[1].parse().expect("Invalid number of dice");
+            let m: u32 = captures[2].parse().expect("Invalid number of faces");
 
-    if let Some(captures) = re.captures(&args.roll_command) {
-        let n: usize = captures[1].parse().expect("Invalid number of dice");
-        let m: u32 = captures[2].parse().expect("Invalid number of faces");
-
-        let mut dice_generator = DiceGenerator::new();
-        match dice_generator.generate(n, m) {
-            Ok(results) => {
-                println!("({}d{}) {} {:?}", n, m, results.iter().sum::<u32>(), results)
+            match dice_generator.generate(n, m) {
+                Ok(results) => println!("{}", results),
+                Err(e) => eprintln!("Error generating dice: {}", e),
+            }
+        },
+        Commands::History => match dice_generator.history() {
+            Ok(records) => {
+                for record in records {
+                    println!("{}", record)
+                }
             },
-            Err(e) => eprintln!("Error generating dice: {}", e),
-        }
-    } else {
-        eprintln!("Invalid roll command format. Please use 'rolling-dice ndm'.");
-        std::process::exit(1);
+            Err(e) => eprintln!("Error: {}", e),
+        },
     }
 }
