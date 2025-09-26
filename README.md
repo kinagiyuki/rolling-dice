@@ -1,22 +1,22 @@
-# rolling-dice
+# trpg-tools
 
-A trial to write a Rust CLI program for rolling dices.
+Command-line tools for playing TRPG written in Rust
 
 ## Installation
 
-To install the `rolling-dice` program, you need to have Rust 1.88.0 or later installed on your system.
+To install the `trpg-tools` program, you need to have Rust 1.88.0 or later installed on your system.
 You can then build and run the project using Cargo:
 
 ```shell
-sh git clone https://github.com/kinagiyuki/rolling-dice.git
-cd rolling-dice
+sh git clone https://github.com/kinagiyuki/trpg-tools.git
+cd trpg-tools
 cargo build --release
 ```
 Then the built binary will be `./target/release`
 
 ## Usage
 
-The `rolling-dice` program is a command-line interface (CLI) tool that allows you to roll dice according to the NdM
+The `trpg-tools` program is a command-line interface (CLI) tool that allows you to roll dice according to the NdM
 format (e.g., 3d6).
 It also provides functionality to display the roll history.
 
@@ -27,7 +27,7 @@ It also provides functionality to display the roll history.
 To roll dice, use the `roll` subcommand followed by the NdM expression:
 
 ```shell
-rolling-dice roll 3d6
+trpg-tools roll 3d6
 ```
 
 This will output the result of rolling three six-sided dice.
@@ -37,10 +37,14 @@ This will output the result of rolling three six-sided dice.
 To view the roll history, use the `history` subcommand:
 
 ```shell
-rolling-dice history
+trpg-tools history
 ```
 
 This will display all previous roll records stored in the CSV file located at `~/.trpg-tools/rolling-records.csv`.
+
+### For convenience
+
+It is recommended to alias `trpg-tools` to its shorten form `tt`
 
 ## Features
 
