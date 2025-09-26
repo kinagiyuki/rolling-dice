@@ -21,7 +21,10 @@ impl Menu {
         let m: u32 = captures[2].parse().expect("Invalid number of faces");
 
         match self.generator.generate(n, m) {
-            Ok(results) => println!("{}", results),
+            Ok(results) => {
+                println!("🎲 Your roll!");
+                println!("{}", results);
+            }
             Err(e) => eprintln!("Error generating dice: {}", e),
         }
     }
@@ -29,10 +32,11 @@ impl Menu {
     pub fn history(&mut self) {
         match self.generator.history(true) {
             Ok(records) => {
+                println!("📜 Rolling History:");
                 for record in records {
                     println!("{}", record)
                 }
-            },
+            }
             Err(e) => eprintln!("Error: {}", e),
         }
     }
