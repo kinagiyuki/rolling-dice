@@ -1,3 +1,4 @@
+use chrono::{Local, TimeZone, Utc};
 use csv::Writer;
 use rand::{rngs::ThreadRng, Rng};
 use std::error::Error;
@@ -15,14 +16,20 @@ pub struct DiceRecord {
     faces: u32,
     sum: u32,
     result: Vec<u32>,
+    rolled_at: i64,
 }
 
 impl fmt::Display for DiceRecord {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let local_time = Local
+            .timestamp_opt(self.rolled_at, 0)
+            .unwrap()
+            .format("%Y-%m-%d %H:%M:%S")
+            .to_string();
         write!(
             f,
-            "({}d{}) {} {:?}",
-            self.dice_count, self.faces, self.sum, self.result
+            "({}d{}) {} {:?} at {}",
+            self.dice_count, self.faces, self.sum, self.result, local_time
         )
     }
 }
@@ -57,6 +64,7 @@ impl DiceGenerator {
             faces,
             sum: result.iter().sum(),
             result,
+            rolled_at: Utc::now().timestamp(),
         };
         self.write_roll_to_csv(&record);
         Ok(record)
@@ -86,6 +94,7 @@ impl DiceGenerator {
             record.faces,
             record.sum,
             serde_json::to_string(&record.result).unwrap(),
+            record.rolled_at,
         ))
         .expect("Failed to write record");
         wtr.flush().expect("Failed to flush the file");
@@ -103,13 +112,14 @@ impl DiceGenerator {
         // Read all records from the CSV file
         let mut records = Vec::new();
         for result in reader.deserialize() {
-            let record: (usize, u32, u32, String) = result?;
+            let record: (usize, u32, u32, String, i64) = result?;
             let result: Vec<u32> = serde_json::from_str(&record.3)?;
             records.push(DiceRecord {
                 dice_count: record.0,
                 faces: record.1,
                 sum: record.2,
                 result,
+                rolled_at: record.4,
             });
         }
 
