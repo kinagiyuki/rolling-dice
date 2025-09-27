@@ -28,8 +28,11 @@ impl fmt::Display for DiceRecord {
             .to_string();
         write!(
             f,
-            "({}d{}) {} {:?} at {}",
-            self.dice_count, self.faces, self.sum, self.result, local_time
+            "{:<8} {:<4} {:?} at {}",
+            format!("({}d{})", self.dice_count, self.faces),
+            self.sum,
+            self.result,
+            local_time
         )
     }
 }
@@ -96,7 +99,7 @@ impl DiceGenerator {
             serde_json::to_string(&record.result).unwrap(),
             record.rolled_at,
         ))
-        .expect("Failed to write record");
+            .expect("Failed to write record");
         wtr.flush().expect("Failed to flush the file");
     }
 
