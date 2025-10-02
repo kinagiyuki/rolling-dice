@@ -1,61 +1,97 @@
 # trpg-tools
 
-Command-line tools for playing TRPG written in Rust
+Command‑line utilities for tabletop RPGs (TRPG), written in Rust.
+The initial tool is a dice roller that supports NdM expressions (e.g., 3d6) and keeps a persistent history of rolls.
 
-## Installation
+## Overview
 
-To install the `trpg-tools` program, you need to have Rust 1.88.0 or later installed on your system.
-You can then build and run the project using Cargo:
+- Roll dice using NdM format with a simple CLI.
+- View a timestamped history of previous rolls.
+- History is saved to a CSV file in your home directory for persistence.
 
-```shell
-sh git clone https://github.com/kinagiyuki/trpg-tools.git
+## Requirements
+
+- Rust toolchain with Cargo installed (via https://rustup.rs/)
+  - Note: If you encounter compilation issues, update to the latest stable Rust using `rustup update stable`.
+- A terminal that supports ANSI colors (for colored output in the history display).
+
+## Setup
+
+Clone and build:
+
+```sh
+git clone https://github.com/kinagiyuki/trpg-tools.git
 cd trpg-tools
 cargo build --release
 ```
-Then the built binary will be `./target/release`
+
+The optimized binary will be at `target/release/trpg-tools` (or `target\release\trpg-tools.exe` on Windows).
+
+You can also run without installing:
+
+```sh
+cargo run -- <command>
+# examples:
+cargo run -- roll 3d6
+cargo run -- history
+```
 
 ## Usage
 
-The `trpg-tools` program is a command-line interface (CLI) tool that allows you to roll dice according to the NdM
-format (e.g., 3d6).
-It also provides functionality to display the roll history.
+After building, invoke the binary directly or via your PATH.
 
-### Commands
+- Roll dice:
+  ```sh
+  trpg-tools roll 3d6
+  ```
+- Show history:
+  ```sh
+  trpg-tools history
+  ```
 
-#### Roll
+Notes:
+- The CLI help name is displayed as "rolling-dice" (from clap metadata), but the produced binary is `trpg-tools`.
+- History is stored at:
+  - Unix/macOS: `~/.trpg-tools/rolling-records.csv`
+  - Windows: `%USERPROFILE%\.trpg-tools\rolling-records.csv`
 
-To roll dice, use the `roll` subcommand followed by the NdM expression:
+### Convenience alias
 
-```shell
-trpg-tools roll 3d6
+You may alias the command to a shorter name, e.g. `tt`:
+
+```sh
+alias tt="trpg-tools"
 ```
 
-This will output the result of rolling three six-sided dice.
+## Scripts and commands
 
-#### History
+Common Cargo commands for this project:
+- Build (debug): `cargo build`
+- Build (release): `cargo build --release`
+- Run: `cargo run -- <args>`
+- Tests: `cargo test`
+- Lint (if installed): `cargo clippy`
+- Format: `cargo fmt`
 
-To view the roll history, use the `history` subcommand:
+CI:
+GitHub Actions workflow `.github/workflows/rust.yml` builds the project and runs `cargo test` on pushes and pull requests to `main`.
 
-```shell
-trpg-tools history
+## Project structure
+
 ```
-
-This will display all previous roll records stored in the CSV file located at `~/.trpg-tools/rolling-records.csv`.
-
-### For convenience
-
-It is recommended to alias `trpg-tools` to its shorten form `tt`
-
-## Features
-
-- **Rolling Dice**: Supports rolling dice using the NdM format (e.g., 3d6).
-- **Roll History**: Keeps a record of all rolls and displays them upon request.
-- **CSV Storage**: Stores roll records in a CSV file for persistence.
-
-## Contributing
-
-Contributions are welcome! Feel free to open issues, create pull requests, or submit feature requests.
+trpg-tools/
+├─ Cargo.toml
+├─ src/
+│  ├─ main.rs          # CLI entry point (clap subcommands: roll, history)
+│  ├─ menu.rs          # Argument parsing/validation and user-facing actions
+│  └─ dice_generator.rs# Dice rolling logic and CSV persistence
+├─ README.md
+├─ LICENSE             # MIT
+└─ .github/
+   └─ workflows/
+      └─ rust.yml      # CI: build and test
+```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
