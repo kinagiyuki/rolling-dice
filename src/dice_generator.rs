@@ -21,18 +21,29 @@ pub struct DiceRecord {
 
 impl fmt::Display for DiceRecord {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Prepare colored segments using ANSI escape codes (works on most modern terminals)
+        let yellow = "\x1b[33m"; // yellow
+        let grey = "\x1b[90m";   // bright black (gray)
+        let reset = "\x1b[0m";   // reset
+        let dice_length = format!("{}{}", yellow, reset).len() + 8;
+
         let local_time = Local
             .timestamp_opt(self.rolled_at, 0)
             .unwrap()
             .format("%Y-%m-%d %H:%M:%S")
             .to_string();
+
+        // Colorize dice descriptor and timestamp; keep sum and result unchanged
+        let colored_dice = format!("{}({}d{}){}", yellow, self.dice_count, self.faces, reset);
+        let colored_time = format!("{}{}{}", grey, local_time, reset);
+
         write!(
             f,
-            "{:<8} {:<4} {:?} at {}",
-            format!("({}d{})", self.dice_count, self.faces),
+            "{:<dice_length$} {:<4} {:?} at {}",
+            colored_dice,
             self.sum,
             self.result,
-            local_time
+            colored_time
         )
     }
 }
